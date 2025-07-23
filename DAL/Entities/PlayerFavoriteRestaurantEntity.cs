@@ -1,4 +1,6 @@
-﻿namespace DAL.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DAL.Entities;
 
 /// <summary>
 /// Represents a many-to-many relationship between players and their favorite restaurants.
@@ -8,12 +10,14 @@ public class PlayerFavoriteRestaurantEntity
     /// <summary>
     /// Gets or sets the unique identifier for the player who has a favorite restaurant.
     /// </summary>
-    public int PlayerId { get; set; }
+    [Required]
+    public int? PlayerId { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier for the favorite restaurant.
     /// </summary>
-    public int RestaurantId { get; set; }
+    [Required]
+    public int? RestaurantId { get; set; }
 
     /// <summary>
     /// Gets or sets the player associated with this favorite restaurant entry.

@@ -1,8 +1,9 @@
 ﻿using DAL.Entities;
+using System.Linq.Expressions;
 
 namespace DAL.Models.QueryModels;
 
-internal class PlayerQueryModel
+public class PlayerQueryModel
 {
     public bool SelectId { get; private set; } = false;
 
@@ -30,7 +31,25 @@ internal class PlayerQueryModel
 
     public bool IncludeOfficeAddress { get; private set; } = false;
 
-    public Func<PlayerEntity, bool>? Predicate { get; private set; } = _ => true;
+    public Expression<Func<PlayerEntity, bool>>? Predicate { get; private set; } = _ => true;
+
+    public readonly static PlayerQueryModel Default = new PlayerQueryModel()
+    {
+        IncludeAlternateAddress = false,
+        IncludeOfficeAddress = false,
+        IncludePrimaryAddress = false,
+        SelectAlternateAddressId = false,
+        SelectDateOfBirth = false,
+        SelectDriverLicenseNumber = false,
+        SelectEmail = true,
+        SelectId = true,
+        SelectName = true,
+        SelectOfficeAddressId = false,
+        SelectPhoneNumber = true,
+        SelectPrimaryAddressId = false,
+        SelectPassportNumber = true,
+        Predicate = _ => true
+    };
 
     private PlayerQueryModel()
     {
@@ -118,7 +137,7 @@ internal class PlayerQueryModel
             return this;
         }
 
-        public Builder Where(Func<PlayerEntity, bool> predicate)
+        public Builder Where(Expression<Func<PlayerEntity, bool>> predicate)
         {
             this._model.Predicate = predicate;
             return this;

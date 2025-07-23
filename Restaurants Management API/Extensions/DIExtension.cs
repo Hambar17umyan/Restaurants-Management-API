@@ -1,7 +1,18 @@
-﻿using DAL.Db;
+﻿using Application.Api.AddressApi.AddAddressCommand;
+using Application.Api.AddressApi.GetAllAddressesQuery;
+using Application.Services.Abstraction;
+using Application.Services.Concrete;
+using DAL.Db;
+using DAL.Repositories.Abstraction;
+using DAL.Repositories.Concrete;
+using DAL.Services.QueryProcessing.Abstraction;
+using DAL.Services.QueryProcessing.Concrete;
 using Domain.Infrastructure.Contracts;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Restaurants_Management_API.Services;
+using System.Reflection;
 
 namespace Restaurants_Management_API.Extensions;
 
@@ -15,7 +26,8 @@ internal static class DIExtension
             .RegisterSwagger()
             .RegisterRepositories()
             .RegisterServices()
-            .RegisterMapper();
+            .RegisterMediator()
+            .RegisterValidators();
     }
 
     private static IServiceCollection RegisterDatabase(this WebApplicationBuilder builder)
@@ -38,17 +50,28 @@ internal static class DIExtension
 
     private static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
-        throw new NotImplementedException("Repository registration is not implemented yet.");
+        return services.AddScoped<IPlayerRepository, PlayerRepository>()
+            .AddScoped<IPlayerQueryProcessor, PlayerQueryProcessor>()
+            .AddScoped<IRestaurantRepository, RestaurantRepository>()
+            .AddScoped<IRestaurantQueryProcessor, RestaurantQueryProcessor>()
+            .AddScoped<IPlayerFavoriteRestaurantRepository, PlayerFavoriteRestaurantRepository>()
+            .AddScoped<IPlayerFavoriteRestaurantQueryProcessor, PlayerFavoriteRestaurantQueryProcessor>()
+            .AddScoped<IAddressRepository, AddressRepository>()
+            .AddScoped<IAddressQueryProcessor, AddressQueryProcessor>()
+            .AddScoped<ICreateFailService, CreateFailService>();
+    }
+
+    private static IServiceCollection RegisterMediator(this IServiceCollection serviceCollection)
+    {
+        return serviceCollection.AddMediatR(builder => builder.RegisterServicesFromAssembly(typeof(AddAddressRequestHandler).Assembly));
     }
 
     private static IServiceCollection RegisterServices(this IServiceCollection services)
     {
-        throw new NotImplementedException("Service registration is not implemented yet.");
-    }
-
-    private static IServiceCollection RegisterMapper(this IServiceCollection services)
-    {
-        throw new NotImplementedException("Mapper registration is not implemented yet.");
+        return services.AddScoped<IResultHandlerService, ResultHandlerService>()
+            .AddScoped<IAddressService, AddressService>()
+            .AddScoped<IRestaurantService, RestaurantService>()
+            .AddScoped<IPlayerService, PlayerService>();
     }
 
     private static IServiceCollection RegisterSwagger(this IServiceCollection services)
@@ -60,6 +83,18 @@ internal static class DIExtension
     private static IServiceCollection RegisterControllers(this IServiceCollection services)
     {
         services.AddControllers();
+        return services;
+    }
+
+    private static IServiceCollection RegisterValidators(this IServiceCollection services)
+    {
+        var assemblies = new List<Assembly>
+        {
+            typeof(AddAddressValidator).Assembly,
+        };
+        _ = services.AddFluentValidationAutoValidation();
+        _ = services.AddFluentValidationAutoValidation();
+        _ = services.AddValidatorsFromAssemblies(assemblies);
         return services;
     }
 }

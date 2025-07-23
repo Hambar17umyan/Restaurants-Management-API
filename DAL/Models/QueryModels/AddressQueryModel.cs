@@ -1,9 +1,25 @@
 ﻿using DAL.Entities;
+using System.Linq.Expressions;
 
 namespace DAL.Models.QueryModels;
 
-internal sealed class AddressQueryModel
+public sealed class AddressQueryModel
 {
+    public static AddressQueryModel Default { get; } = new()
+    {
+        Predicate = _ => true,
+        SelectId = true,
+        SelectStreetName = true,
+        SelectAddressLine1 = true,
+        SelectAddressLine2 = true,
+        SelectCity = true,
+        SelectCountry = true,
+        SelectPostalCode = true,
+        SelectState = true,
+    };
+
+    public bool SelectId { get; private set; } = false;
+
     public bool SelectStreetName { get; private set; } = false;
 
     public bool SelectAddressLine1 { get; private set; } = false;
@@ -18,7 +34,7 @@ internal sealed class AddressQueryModel
 
     public bool SelectCountry { get; private set; } = false;
 
-    public Func<AddressEntity, bool>? Predicate { get; private set; }
+    public Expression<Func<AddressEntity, bool>>? Predicate { get; private set; }
 
     public AddressQueryModel()
     {
@@ -70,9 +86,15 @@ internal sealed class AddressQueryModel
             return this;
         }
 
-        public Builder Where(Func<AddressEntity, bool> predicate)
+        public Builder Where(Expression<Func<AddressEntity, bool>> predicate)
         {
             this._model.Predicate = predicate;
+            return this;
+        }
+
+        public Builder SelectId()
+        {
+            this._model.SelectId = true;
             return this;
         }
 

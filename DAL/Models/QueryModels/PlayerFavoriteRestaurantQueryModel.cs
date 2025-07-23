@@ -1,8 +1,9 @@
 ﻿using DAL.Entities;
+using System.Linq.Expressions;
 
 namespace DAL.Models.QueryModels;
 
-internal class PlayerFavoriteRestaurantQueryModel
+public class PlayerFavoriteRestaurantQueryModel
 {
     public bool SelectRestaurantId { get; private set; } = false;
 
@@ -12,7 +13,7 @@ internal class PlayerFavoriteRestaurantQueryModel
 
     public bool IncludePlayer { get; private set; } = false;
 
-    public Func<PlayerFavoriteRestaurantEntity, bool>? Predicate { get; private set; } = _ => true;
+    public Expression<Func<PlayerFavoriteRestaurantEntity, bool>>? Predicate { get; private set; } = _ => true;
 
     public class Builder
     {
@@ -42,7 +43,7 @@ internal class PlayerFavoriteRestaurantQueryModel
             return this;
         }
 
-        public Builder Where(Func<PlayerFavoriteRestaurantEntity, bool> predicate)
+        public Builder Where(Expression<Func<PlayerFavoriteRestaurantEntity, bool>> predicate)
         {
             this._model.Predicate = predicate;
             return this;

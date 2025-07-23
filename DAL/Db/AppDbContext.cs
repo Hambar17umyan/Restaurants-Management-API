@@ -12,6 +12,10 @@ public class AppDbContext : DbContext
 
     public DbSet<PlayerEntity> Players { get; set; }
 
+    public DbSet<RestaurantMembershipEntity> RestaurantMemberships { get; set; }
+
+    public DbSet<PlayerFavoriteRestaurantEntity> PlayerFavoriteRestaurants { get; set; }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
@@ -48,28 +52,18 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlayerEntity>()
             .HasOne(p => p.PrimaryAddress)
-            .WithOne()
-            .HasForeignKey<PlayerEntity>(p => p.PrimaryAddressId);
+            .WithMany()
+            .HasForeignKey(p => p.PrimaryAddressId);
 
         modelBuilder.Entity<PlayerEntity>()
             .HasOne(p => p.AlternateAddress)
-            .WithOne()
-            .HasForeignKey<PlayerEntity>(p => p.AlternateAddressId);
+            .WithMany()
+            .HasForeignKey(p => p.AlternateAddressId);
 
         modelBuilder.Entity<PlayerEntity>()
             .HasOne(p => p.OfficeAddress)
-            .WithOne()
-            .HasForeignKey<PlayerEntity>(p => p.OfficeAddressId);
-
-        modelBuilder.Entity<PlayerEntity>()
-            .HasMany<RestaurantEntity>()
             .WithMany()
-            .UsingEntity<PlayerFavoriteRestaurantEntity>(pfr => pfr.ToTable("PlayerFavoriteRestaurants"));
-
-        modelBuilder.Entity<PlayerEntity>()
-            .HasMany<RestaurantEntity>()
-            .WithMany()
-            .UsingEntity<RestaurantMembershipEntity>(rm => rm.ToTable("RestaurantMembership"));
+            .HasForeignKey(p => p.OfficeAddressId);
 
         return modelBuilder;
     }
@@ -87,6 +81,17 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<RestaurantMembershipEntity>()
             .HasKey(rm => new { rm.RestaurantId, rm.PlayerId });
+
+        modelBuilder.Entity<RestaurantMembershipEntity>()
+            .HasOne(rm => rm.Restaurant)
+            .WithMany()
+            .HasForeignKey(rm => rm.RestaurantId);
+
+        modelBuilder.Entity<RestaurantMembershipEntity>()
+            .HasOne(rm => rm.Player)
+            .WithMany()
+            .HasForeignKey(rm => rm.PlayerId);
+
         return modelBuilder;
     }
 
@@ -94,6 +99,17 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<PlayerFavoriteRestaurantEntity>()
             .HasKey(rm => new { rm.RestaurantId, rm.PlayerId });
+
+        modelBuilder.Entity<PlayerFavoriteRestaurantEntity>()
+            .HasOne(rm => rm.Restaurant)
+            .WithMany()
+            .HasForeignKey(rm => rm.RestaurantId);
+
+        modelBuilder.Entity<PlayerFavoriteRestaurantEntity>()
+            .HasOne(rm => rm.Player)
+            .WithMany()
+            .HasForeignKey(rm => rm.PlayerId);
+
         return modelBuilder;
     }
 }

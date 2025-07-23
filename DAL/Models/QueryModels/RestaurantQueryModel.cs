@@ -1,9 +1,22 @@
 ﻿using DAL.Entities;
+using System.Linq.Expressions;
 
 namespace DAL.Models.QueryModels;
 
-internal class RestaurantQueryModel
+public class RestaurantQueryModel
 {
+    public static readonly RestaurantQueryModel Default = new()
+    {
+        IncludeAddress = false,
+        SelectId = true,
+        SelectName = true,
+        SelectAddressId = true,
+        SelectPhoneNumber = true,
+        SelectOpenningTime = true,
+        SelectClosingTime = true,
+        Predicate = _ => true,
+    };
+
     public bool SelectId { get; private set; } = false;
 
     public bool SelectName { get; private set; } = false;
@@ -18,7 +31,7 @@ internal class RestaurantQueryModel
 
     public bool IncludeAddress { get; private set; } = false;
 
-    public Func<RestaurantEntity, bool>? Predicate { get; private set; } = null;
+    public Expression<Func<RestaurantEntity, bool>>? Predicate { get; private set; } = null;
 
     private RestaurantQueryModel() 
     {
@@ -70,7 +83,7 @@ internal class RestaurantQueryModel
             return this;
         }
 
-        public Builder Where(Func<RestaurantEntity, bool> predicate)
+        public Builder Where(Expression<Func<RestaurantEntity, bool>> predicate)
         {
             this._model.Predicate = predicate;
             return this;
