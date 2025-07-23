@@ -10,6 +10,7 @@ internal static class DIExtension
     public static void RegisterDependencies(this WebApplicationBuilder builder)
     {
         builder.RegisterDatabase();
+        builder.RegisterLogger();
         builder.Services.RegisterControllers()
             .RegisterSwagger()
             .RegisterRepositories()
@@ -25,6 +26,14 @@ internal static class DIExtension
                 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
                 opt.UseSqlite(connectionString);
             });
+    }
+
+    private static WebApplicationBuilder RegisterLogger(this WebApplicationBuilder builder)
+    {
+        _ = builder.Logging.ClearProviders();
+        _ = builder.Logging.AddConsole();
+        _ = builder.Logging.AddDebug();
+        return builder;
     }
 
     private static IServiceCollection RegisterRepositories(this IServiceCollection services)
