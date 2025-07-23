@@ -11,4 +11,5 @@ public enum ErrorType
     AddressdNotFound = 404004,
 
     MultiplePlayersWithSameNameFound = 400001,
+    RestaurantMembershipAlreadyExists = 400002,
 }

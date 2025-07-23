@@ -8,6 +8,8 @@ using DAL.Services.QueryProcessing.Abstraction;
 using Domain.Exceptions.Db;
 using Domain.Infrastructure.ResultModels;
 using FluentResults;
+using System.Linq.Expressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DAL.Repositories.Concrete;
 
@@ -39,6 +41,46 @@ public class RestaurantRepository(AppDbContext dbContext, IRestaurantQueryProces
         return Result.Ok(entity.Id!.Value);
     }
 
+    public Result<QueryResult<RestaurantMembershipEntity>> GetMembershipsByMinAge(int restaurantId, int minAge)
+    {
+        var joined = this._dbContext.RestaurantMemberships
+            .Where(x => x.RestaurantId == restaurantId)
+            .Join(this._dbContext.Players,
+                membership => membership.PlayerId,
+                player => player.Id,
+                (membership, player) => new { membership, player });
+
+        var res = new QueryResult<RestaurantMembershipEntity>(
+        joined
+        .Where(x => ((DateOnly.FromDateTime(DateTime.Today)).Year - x.player.DateOfBirth!.Value.Year >= minAge))
+        .Select(x => x.membership)
+                .ToList()
+        );
+
+        return Result.Ok(res);
+    }
+
+    public Result<QueryResult<RestaurantMembershipEntity>> GetMembershipsByRestaurant(int restaurantId)
+    {
+        var memberships = this._dbContext.RestaurantMemberships
+            .Where(x => x.RestaurantId == restaurantId)
+            .ToList();
+
+        var queryResult = new QueryResult<RestaurantMembershipEntity>(memberships);
+        return Result.Ok(queryResult);
+    }
+
+    public Result<QueryResult<RestaurantMembershipEntity>> GetMembershipsByRestaurantWhere(int restaurantId, Expression<Func<RestaurantMembershipEntity, bool>> predicate)
+    {
+        var memberships = this._dbContext.RestaurantMemberships
+            .Where(x => x.RestaurantId == restaurantId)
+            .Where(predicate)
+            .ToList();
+
+        var queryResult = new QueryResult<RestaurantMembershipEntity>(memberships);
+        return Result.Ok(queryResult);
+    }
+
     public Result<RestaurantEntity> GetRestaurantById(int id, RestaurantQueryModel query)
     {
         var res = this._restaurantQueryProcessor.Process(this._dbContext.Restaurants.Where(x => x.Id == id), query);
@@ -53,7 +95,7 @@ public class RestaurantRepository(AppDbContext dbContext, IRestaurantQueryProces
 
     public Result<RestaurantEntity> GetRestaurantById(int id)
     {
-        return this.GetRestaurantById(id,RestaurantQueryModel.Default);
+        return this.GetRestaurantById(id, RestaurantQueryModel.Default);
     }
 
     public Result<QueryResult<RestaurantEntity>> GetRestaurants(RestaurantQueryModel query, int pageSize, int pageNumber)
@@ -78,5 +120,47 @@ public class RestaurantRepository(AppDbContext dbContext, IRestaurantQueryProces
     public Result<QueryResult<RestaurantEntity>> GetRestaurantsContainingInName(string name)
     {
         return this.GetRestaurantsContainingInName(name, RestaurantQueryModel.Default);
+    }
+
+    public Result RegisterMembership(int restaurantId, int playerId)
+    {
+        var query = new RestaurantQueryModel.Builder()
+            .SelectId()
+            .Where(x => true)
+            .Build();
+        var restaurant = this.GetRestaurantById(restaurantId, query);
+        if (restaurant.IsFailed)
+        {
+            return ResultHelper.ErrorResultWithMessage(ErrorType.RestaurantByIdNotFound, "Restaurant with specified id not found.");
+        }
+
+        var player = this._dbContext.Players.Find(playerId);
+        if (player == null)
+        {
+            return ResultHelper.ErrorResultWithMessage(ErrorType.PlayerByIdNotFound, "Player with specified id not found.");
+        }
+
+        var membership = this._dbContext.RestaurantMemberships.FirstOrDefault(x => x.RestaurantId == restaurant.Value.Id && x.PlayerId == playerId);
+        if (membership != null)
+        {
+            return ResultHelper.ErrorResultWithMessage(ErrorType.RestaurantMembershipAlreadyExists, "Restaurant membership already exists.");
+        }
+
+        membership = new RestaurantMembershipEntity
+        {
+            RestaurantId = restaurant.Value.Id,
+            PlayerId = playerId
+        };
+        this._dbContext.RestaurantMemberships.Add(membership);
+        try
+        {
+            this._dbContext.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            throw new DbException(ex, DbExceptionType.CantAddRestaurantMembership);
+        }
+
+        return Result.Ok();
     }
 }
