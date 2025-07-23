@@ -5,5 +5,6 @@ public enum DbExceptionType
     Unspecified,
     CantAddPlayer,
     CantAddRestaurant,
-    CantAddRestaurantMembership
+    CantAddRestaurantMembership,
+    CantAddFavRestaurant
 }

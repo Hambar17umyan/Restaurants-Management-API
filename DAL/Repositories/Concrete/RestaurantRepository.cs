@@ -43,12 +43,21 @@ public class RestaurantRepository(AppDbContext dbContext, IRestaurantQueryProces
 
     public Result<QueryResult<RestaurantMembershipEntity>> GetMembershipsByMinAge(int restaurantId, int minAge)
     {
+        var rest = this.GetRestaurantById(restaurantId, new RestaurantQueryModel.Builder()
+            .SelectId()
+            .Where(x => true)
+            .Build());
+        if (rest.IsFailed)
+        {
+            return ResultHelper.ErrorResultWithMessage<QueryResult<RestaurantMembershipEntity>>(ErrorType.RestaurantByIdNotFound, "Restaurant with specified id not found.");
+        }
+
         var joined = this._dbContext.RestaurantMemberships
-            .Where(x => x.RestaurantId == restaurantId)
-            .Join(this._dbContext.Players,
-                membership => membership.PlayerId,
-                player => player.Id,
-                (membership, player) => new { membership, player });
+        .Where(x => x.RestaurantId == restaurantId)
+        .Join(this._dbContext.Players,
+            membership => membership.PlayerId,
+            player => player.Id,
+            (membership, player) => new { membership, player });
 
         var res = new QueryResult<RestaurantMembershipEntity>(
         joined

@@ -16,5 +16,5 @@ public interface IPlayerFavoriteRestaurantRepository
 
     Result<QueryResult<PlayerEntity>> GetPlayerFavoriteRestaurants(int pageSize, int pageNumber);
 
-    Result<int> AddPlayerFavoriteRestaurant(AddPlayerFavoriteRestaurantDto favDto);
+    Result AddPlayerFavoriteRestaurant(AddPlayerFavoriteRestaurantDto favDto);
 }

@@ -1,5 +1,4 @@
-﻿
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Api.RestaurantApi.GetRestaurantByIdQuery;
 

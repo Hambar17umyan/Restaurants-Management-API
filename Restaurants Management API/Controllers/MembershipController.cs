@@ -28,7 +28,7 @@ public class MembershipController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Register([FromQuery]GetMembershipsByMinAgeRequest request)
+    public async Task<IActionResult> GetMemberships([FromQuery]GetMembershipsByMinAgeRequest request)
     {
         var res = await this._mediator.Send(request);
         var response = this._resultHandlerService.HandleResult(res);

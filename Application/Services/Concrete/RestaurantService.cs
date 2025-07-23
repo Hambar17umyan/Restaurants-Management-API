@@ -1,4 +1,5 @@
 ﻿using Application.Api.RestaurantApi.AddRestaurantCommand;
+using Application.Api.RestaurantApi.GetPlayersFavoriteRestaurantsByName;
 using Application.Api.RestaurantApi.GetRestaurantByIdQuery;
 using Application.Services.Abstraction;
 using DAL.Models.QueryModels;

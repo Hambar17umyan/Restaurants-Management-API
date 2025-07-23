@@ -79,6 +79,16 @@ public class ResultHandlerService : IResultHandlerService
                     HttpStatusCode.NotFound,
                     error.ShouldExposeMessage ? error.ApiMessage! : "",
                     error.Metadata);
+            case ErrorType.RestaurantMembershipAlreadyExists:
+                return this._createFailService.CreateFail(
+                    HttpStatusCode.BadRequest,
+                    error.ShouldExposeMessage ? error.ApiMessage! : "",
+                    error.Metadata);
+            case ErrorType.FavoriteRestaurantAlreadyExists:
+                return this._createFailService.CreateFail(
+                    HttpStatusCode.BadRequest,
+                    error.ShouldExposeMessage ? error.ApiMessage! : "",
+                    error.Metadata);
             default:
                 throw new UnknownErrorException("The enum type is not registered in result handler.");
         }

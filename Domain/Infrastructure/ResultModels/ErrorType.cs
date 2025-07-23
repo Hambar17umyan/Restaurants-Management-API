@@ -12,4 +12,5 @@ public enum ErrorType
 
     MultiplePlayersWithSameNameFound = 400001,
     RestaurantMembershipAlreadyExists = 400002,
+    FavoriteRestaurantAlreadyExists = 400003
 }
